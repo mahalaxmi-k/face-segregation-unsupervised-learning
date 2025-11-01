@@ -1,0 +1,151 @@
+Face Detection & Segregation (Unsupervised Learning Version):
+-> This project is an unsupervised system for face grouping and organization.
+-> Instead of training a classifier with labeled reference images, it automatically clusters faces based on similarity — no manual labeling required.
+-> It uses MTCNN (for face detection) and InceptionResnetV1 (FaceNet) (for face embeddings), then applies unsupervised algorithms (like K-Means, DBSCAN, or Agglomerative Clustering) to group similar faces together.
+
+Who Can Use This?
+This version is ideal for:
+-> People who want to automatically group large photo collections by person without manually labeling images.
+-> Researchers or students studying unsupervised representation learning and clustering-based image organization.
+-> Archivists or photographers who want to discover recurring faces automatically.
+
+Quick Summary (Gist):
+You only need:
+1. A folder in Google Drive with input photos (mixed people, events, or collections).
+2. The notebook (face_segregation_unsupervised.ipynb) in Google Colab.
+3. The code automatically detects faces, computes embeddings, and groups similar faces.
+4. The output will be a folder in Drive structured as:
+/output_clustered/
+ ├── cluster_0/
+ ├── cluster_1/
+ ├── cluster_2/
+ └── ...
+
+Each folder represents a unique person or group of visually similar faces.
+
+Step-by-Step Setup (Google Colab):
+1. Install Required Libraries
+Run this cell first in Colab:
+
+!pip uninstall -y pillow
+!pip install pillow==9.5.0 --force-reinstall
+!pip install facenet-pytorch==2.5.3
+!pip install -q torch torchvision matplotlib seaborn scikit-learn opencv-python-headless pandas
+
+2. Mount Google Drive
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+Your files will appear under /content/drive/MyDrive/.
+
+3. Folder Structure in Google Drive
+Create a project folder like this:
+
+/MyDrive/face_project_unsupervised/
+ ├── input_photos/
+ │    ├── photo1.jpg
+ │    ├── photo2.jpg
+ │    └── ...
+ └── output_clustered/   ← (This will be automatically created)
+
+4. Update Configuration Paths in Code
+Edit these paths in your notebook before running:
+
+input_path = "/content/drive/MyDrive/face_project_unsupervised/input_photos"
+CFG = {
+    "image_size": 160,
+    "blur_threshold": 80,
+    "output_dir": "/content/drive/MyDrive/face_project_unsupervised/output_clustered",
+    "cluster_method": "dbscan",   # or "kmeans", "agglomerative"
+    "min_samples": 2,
+    "eps": 0.7
+}
+
+5. Run the Clustering Step
+Once the setup is done, execute the main clustering cell.
+The notebook will:
+-> Detect faces in all input photos.
+-> Compute embeddings using FaceNet (512-D feature vectors).
+-> Apply the selected unsupervised clustering algorithm.
+-> Create folders (cluster_0, cluster_1, …) and copy similar faces there.
+
+6. Visual Summary
+At the end, the notebook automatically displays:
+-> A bar chart showing how many faces were found per cluster.
+-> Optionally, a representative face image for each cluster.
+
+Example output:
+Cluster	                  Images
+cluster_0	                  15
+cluster_1	                  12
+cluster_2	                  9
+noise (unclustered)        	3
+
+Requirements (Complete List):
+pillow==9.5.0  
+facenet-pytorch==2.5.3  
+torch  
+torchvision  
+matplotlib  
+seaborn  
+scikit-learn  
+opencv-python-headless  
+pandas  
+numpy
+
+Tips for Best Results:
+1. Use Google Colab GPU runtime for faster embedding generation.
+→ Runtime → Change runtime type → Hardware accelerator → GPU.
+2. Use clear and varied photos for better clustering quality.
+3. You can experiment with different clustering algorithms:
+    KMeans for a fixed number of clusters.
+    DBSCAN for auto-detection of the number of groups.
+    Agglomerative for hierarchical grouping.
+4. Adjust hyperparameters like eps, min_samples, or n_clusters depending on photo diversity.
+
+Behind the Scenes:
+1. Face Detection:
+MTCNN detects and crops faces.
+
+2. Face Embedding:
+Each face is passed through InceptionResnetV1 (FaceNet) to get a 512D vector.
+
+3. Clustering:
+Embeddings are grouped using an unsupervised algorithm.
+Each cluster is saved in its own folder.
+
+4. Segregation:
+Faces belonging to the same cluster are copied into output_clustered/cluster_X/.
+
+
+Example Output Folder
+/output_clustered/
+ ├── cluster_0/
+ │    ├── img1.jpg
+ │    ├── img7.jpg
+ │    └── img12.jpg
+ ├── cluster_1/
+ │    ├── img2.jpg
+ │    ├── img9.jpg
+ ├── cluster_2/
+ │    └── img5.jpg
+ └── noise/
+      └── img15.jpg
+
+Notes
+-> All computation (embeddings + clustering) runs on GPU if available.
+-> The output directory is automatically created.
+-> “Noise” or “unknown” cluster may appear for faces that don’t fit any group.
+-> Works best for distinct, clear faces (not extreme poses or heavy occlusions).
+
+Credits
+Face Detection: MTCNN — facenet-pytorch
+Face Embeddings: InceptionResnetV1 (VGGFace2 pretrained model)
+Clustering: scikit-learn (KMeans / DBSCAN / Agglomerative)
+Author: K. Mahalaxmi
+Environment: Google Colab
+
+License
+This project is open-source.
+You can use, modify, or distribute it for personal or academic use.
